@@ -1,0 +1,76 @@
+\documentclass{beamer}
+ 
+\title{Generalized Search Trees}
+\author{Mihail Bogojeski, Alexander Svozil}
+\date{\today}
+ 
+\begin{document}
+\maketitle
+\frame{\tableofcontents[currentsection]}
+ 
+\section {What is GiST?}
+\begin{frame}%%Eine Folie
+  \frametitle{GiST Definition} %%Folientitel
+  \textbf {What is Gist?}
+  \begin {itemize}
+  \item Data Structure that can be used to build a variety of height-balanced search trees.
+  \pause \item Makes no assumptions about type of data being stored or queries being serviced
+  \pause \item Allows easy implementations of well known indexed trees like B+-Trees, R-Trees
+  \end {itemize}
+\end{frame}
+
+\section {How is GiST different?}
+\begin{frame}%%Eine Folie
+  \frametitle{How is GiST different?} %%Folientitel
+  
+  \begin {itemize}
+  \item  B+-Tree Functions 
+  \begin {itemize}
+    \item range predicates (e.g. $c_1 \leq i \leq c_2$)
+  \end {itemize}
+  \pause \item R-Tree Functions 
+  \begin {itemize}
+    \item region predicates (e.g. "find all \emph{i} such that  ($x_1,y_1,x_2,y_2$) overlaps \emph{i} ")
+  \end {itemize} 
+  \pause \item GiST Functions
+  \begin {itemize}
+    \item GiST can work with any arbitrary predicate and data type (with any number of free variables)
+  \end {itemize} 
+  
+  \end {itemize}
+\end{frame}
+
+\section {Why GiST?}
+\begin{frame}%%Eine Folie
+  \frametitle{Why use GiST?} %%Folientitel
+  
+  \begin {itemize}
+  \item Extensibility in the conext of database systems
+  \pause \item Allows the easy evolution of a database system to support new tree-based indexes
+  \pause \item Allows developers to focus on new features of index types without becoming experts in database system internals
+  \end {itemize}
+\end{frame}
+
+\section {Implementation of GiST}
+\begin{frame}%%Eine Folie
+  \frametitle{Tree Functions} %%Folientitel
+  \begin {itemize}
+  \item $search :: Predicate \rightarrow GiST \rightarrow [LeafEntry]$
+  \pause \item $insert :: Entry \rightarrow GiST \rightarrow Level \rightarrow GiST$
+  \pause \item $chooseSubtree :: GiST \rightarrow GiST \rightarrow Entry \rightarrow GiST $
+  \pause \item $split ::  GiST \rightarrow Node \rightarrow Entry \rightarrow GiST$
+  \pause \item $adjustKeys :: GiST \rightarrow Node \rightarrow GiST$
+  \pause \item $delete :: LeafEntry \rightarrow GiST \rightarrow GiST$
+  \pause \item $condenseTree ::  GiST \rightarrow Node \rightarrow GiST$
+  \end {itemize}
+\end{frame}
+\begin{frame}%%Eine Folie
+  \frametitle{Key Functions} %%Folientitel
+  \begin {itemize}
+  \item $consistent :: Entry \rightarrow Predicate \rightarrow Bool$
+  \pause \item $union ::  [Entry] \rightarrow Predicate$
+  \pause \item $penalty :: Entry \rightarrow Entry \rightarrow Integer$
+  \pause \item $pickSplit ::  [Entry] \rightarrow [[Entry]]$
+  \end {itemize}
+\end{frame}
+\end{document}

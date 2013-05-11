@@ -11,13 +11,13 @@ type LeafEntry a    = (a,Predicate a)
 type NodeEntry a    = (GiST a,Predicate a)
 type Penalty        = Integer
 type Level          = Integer
-data Predicate a    = Predicate (a -> Bool)
+data Predicate a    = Predicate (a -> Bool) 
 
 class Predicates p a  where
-    consistent  ::  p a  -> (Entry a)    ->  p a  -> Bool
-    union       ::  p a  -> [(Entry a)]  ->  p a
-    penalty     ::  p a  -> (Entry a)    -> (Entry a)    -> Penalty
-    pickSplit   ::  p a  ->[(Entry a)]  -> [[Entry a]]
+    consistent  ::  (Entry a)    ->  p a  -> Bool
+    union       ::  [(Entry a)]  ->  p a
+    penalty     ::  (Entry a)    -> (Entry a)    -> Penalty
+    pickSplit   ::  [(Entry a)]  -> [[Entry a]]
 
 class GiSTs g a where
     search          ::  g a -> Predicate a  -> [LeafEntry a]
@@ -36,10 +36,11 @@ class GiSTs g a where
 
 
 instance (Eq a) => Predicates Predicate a where
-    consistent p1 e p = True
-    union p1  (e:es) =  p1
-    penalty p1 e1 e2 =  0
-    pickSplit p1 (e:es) = [es]
+    consistent e p = True
+    union ((LeafEntry (a1, p)):es) = p
+    union ((NodeEntry (g, p)):es) = p
+    penalty e1 e2 =  0
+    pickSplit  (e:es) = [es]
  --class Predicates p a where
 --	consistent :: (Entry a) -> Predicate a-> Bool
 --	union :: [(Entry a)] -> Predicate a
