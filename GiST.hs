@@ -1,32 +1,32 @@
 {-# LANGUAGE MultiParamTypeClasses
     ,FlexibleInstances#-}
 
-data GiST a         = Leaf [LeafEntry a] | Node [NodeEntry a]            -- | OrderedLeaf [OrderedLeafEntry a]
-data Entry a        = LeafEntry (LeafEntry a)  | NodeEntry (NodeEntry a) -- | OrderedEntry(OrderedLeafEntry a) 
+data GiST p a  = Leaf [LeafEntry p a] | Node [NodeEntry p a]            -- | OrderedLeaf [OrderedLeafEntry a]
+data Entry p a = LeafEntry (LeafEntry p a)  | NodeEntry (NodeEntry p a) -- | OrderedEntry(OrderedLeafEntry a) 
 
 
-type LeafEntry a    = (a,Predicate a) 
+type LeafEntry p a    = (a, p a) 
 --data OrderedLeafEntry a = OLeafEntry (OrderedLeafEntry a) (a,Predicate a) (OrderedLeafEntry a) | Nil
 
-type NodeEntry a    = (GiST a,Predicate a)
+type NodeEntry p a    = (GiST p a, p a)
 type Penalty        = Integer
 type Level          = Integer
 data Predicate a    = Predicate (a -> Bool) 
 
 class Predicates p a  where
-    consistent  ::  (Entry a)    ->  p a  -> Bool
-    union       ::  [(Entry a)]  ->  p a
-    penalty     ::  (Entry a)    -> (Entry a)    -> Penalty
-    pickSplit   ::  [(Entry a)]  -> [[Entry a]]
+    consistent  :: (Entry p a)  ->  p a  -> Bool
+    union       :: [(Entry p a)] ->  p a
+    penalty     :: (Entry p a)    -> (Entry p a)    -> Penalty
+    pickSplit   :: [(Entry p a)]  -> [[Entry p a]]
 
-class GiSTs g a where
-    search          ::  g a -> Predicate a  -> [LeafEntry a]
-    insert          ::  g a -> Entry a      -> Level        -> g a
-    chooseSubtree   ::  g a -> Entry a      -> Level        -> g a 
-    split           ::  g a -> g a          -> Entry a      -> g a
-    adjustKeys      ::  g a -> g a          -> g a
-    delete          ::  g a -> LeafEntry a  -> g a 
-    condenseTree    ::  g a -> g a          -> g a
+class GiSTs g p a where
+    search          :: Predicates p a => g p a -> p a  -> [LeafEntry p a]
+    insert          :: Predicates p a => g p a -> Entry p a      -> Level        -> g p a
+    chooseSubtree   :: Predicates p a => g p a -> Entry p a      -> Level        -> g p a 
+    split           :: Predicates p a => g p a -> g p a          -> Entry p a      -> g p a
+    adjustKeys      :: Predicates p a => g p a -> g p a          -> g p a
+    delete          :: Predicates p a => g p a -> LeafEntry p a  -> g p a 
+    condenseTree    :: Predicates p a => g p a -> g p a          -> g p a
 
 
 --class OrderedGiSTs g a where
