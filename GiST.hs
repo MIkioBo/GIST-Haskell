@@ -19,14 +19,15 @@ class Predicates p a  where
     penalty     :: (Entry p a) -> (Entry p a) -> Penalty
     pickSplit   :: [(Entry p a)] -> [[Entry p a]]
 
-class GiSTs g p a where
+-- (Integer,Integer paare sind min und max anzahl an entries im baum)
+class (Eq a) => GiSTs g p a where
     search          :: Predicates p a => g p a -> p a -> [LeafEntry p a]
-    insert          :: Predicates p a => g p a -> Entry p a -> Level -> g p a
+    insert          :: Predicates p a => g p a -> (Integer,Integer) -> Entry p a -> Level -> g p a
     chooseSubtree   :: Predicates p a => g p a -> Entry p a -> Level -> g p a 
-    split           :: Predicates p a => g p a -> g p a -> Entry p a -> g p a
-    adjustKeys      :: Predicates p a => g p a -> g p a -> g p a
-    delete          :: Predicates p a => g p a -> LeafEntry p a -> g p a 
-    condenseTree    :: Predicates p a => g p a -> g p a -> g p a
+    split           :: Predicates p a => g p a -> (Integer,Integer) -> g p a -> Entry p a -> g p a
+    adjustKeys      :: Predicates p a => g p a -> (Integer,Integer) -> g p a -> g p a
+    delete          :: Predicates p a => g p a -> (Integer,Integer) -> LeafEntry p a -> g p a 
+    condenseTree    :: Predicates p a => g p a -> (Integer,Integer) -> g p a -> g p a
 
 
 --class OrderedGiSTs g a where
@@ -42,7 +43,7 @@ instance (Eq a) => Predicates Predicate a where
     penalty e1 e2 =  0
     pickSplit  (e:es) = [es]
 
-instance GiSTs GiST p a where
+instance Eq a => GiSTs GiST p a where
     search (Leaf es) p              = [e | e <- es, consistent (LeafEntry e) p] 
     search (Node []) _              = []
     search (Node (e:es)) p
