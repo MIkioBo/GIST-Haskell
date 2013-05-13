@@ -34,22 +34,7 @@ class (Eq a, Predicates p a) => GiSTs g p a where
     condenseTree    :: g p a -> (Integer,Integer) -> g p a -> g p a
 
 
---class OrderedGiSTs g a where
---    findMin  ::  g a -> Predicate a -> OrderedLeafEntry a
---    next    ::  g a -> GiST a       -> OrderedLeafEntry a
 
-
-
-{--instance (Eq a) => Predicates Predicate a where
-    consistent e p = True
-    union ((LeafEntry (a1,p)):es) = p
-    union ((NodeEntry (g, p)):es) = p
-    penalty e1 e2 =  0
-    pickSplit  (e:es) = [es]
---}
-
---delete2 :: (Eq a, Predicates p a, GiSTs g p a) => g p a -> (Integer,Integer) -> LeafEntry p a -> [SearchResult p a] -> g p a
---delete2 g _ _ []      = g
 --delete2 g (min, max) e1 ((SearchResult (Leaf par es) e2):results) 
 --        |e1 == e2       = condenseTree g (min,max) (Leaf par (filter (/=e2) es))
 
@@ -60,6 +45,12 @@ instance (Eq a, Predicates p a) => GiSTs GiST p a where
     search (Node par (e:es)) p
         |consistent (NodeEntry e) p = (search (fst e) p) ++ (search (Node par es) p)
         |otherwise                  = search (Node par es) p
+    insert gist (min,max) e l   = gist 
+    chooseSubtree gist e l = gist 
+    split gist (min,max) gist2  e = gist2 
+    adjustKeys gist (min,max) gist2 = gist2 
+    delete gist (min,max) (a,pa) = gist
+    condenseTree gist (min,max) gist2 = gist2
     
     
     --delete g (min, max) e       =  g (min,max) head (search g e)
@@ -74,4 +65,18 @@ instance (Eq a, Predicates p a) => GiSTs GiST p a where
 --
 --  
 --data Entry a = Entry (Predicate a)  Node	
+
+--class OrderedGiSTs g a where
+--    findMin  ::  g a -> Predicate a -> OrderedLeafEntry a
+--    next    ::  g a -> GiST a       -> OrderedLeafEntry a
+
+
+
+{--instance (Eq a) => Predicates Predicate a where
+    consistent e p = True
+    union ((LeafEntry (a1,p)):es) = p
+    union ((NodeEntry (g, p)):es) = p
+    penalty e1 e2 =  0
+    pickSplit  (e:es) = [es]
+--}
 
