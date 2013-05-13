@@ -8,7 +8,7 @@ type LeafEntry p a = (a, p a)
 --data OrderedLeafEntry a = OLeafEntry (OrderedLeafEntry a) (a,Predicate a) (OrderedLeafEntry a) | Nil
 
 type NodeEntry p a = (GiST p a, p a)
-data SearchResult p a = SearchResult (GiST p a) (LeafEntry p a)
+--data SearchResult p a = SearchResult (GiST p a) (LeafEntry p a)
 type Penalty = Integer
 type Level = Integer
 --data Predicate a = Predicate (a -> Bool) 
@@ -25,7 +25,7 @@ class Predicates p a  where
 
 -- (Integer,Integer paare sind min und max anzahl an entries im baum)
 class (Eq a, Predicates p a) => GiSTs g p a where
-    search          :: g p a -> p a -> [SearchResult p a]
+    search          :: g p a -> p a -> [LeafEntry p a]
     insert          :: g p a -> (Integer,Integer) -> Entry p a -> Level -> g p a
     chooseSubtree   :: g p a -> Entry p a -> Level -> g p a 
     split           :: g p a -> (Integer,Integer) -> g p a -> Entry p a -> g p a
@@ -36,11 +36,14 @@ class (Eq a, Predicates p a) => GiSTs g p a where
 
 
 --delete2 g (min, max) e1 ((SearchResult (Leaf par es) e2):results) 
+--deleteFromNode :: (Eq a, Predicates p a) => (Integer,Integer) -> LeafEntry p a -> [SearchResult p a] -> g p a
+--deleteFromNode g _ _ []      = g
+--deleteFromNode g (min, max) e1 ((SearchResult (Leaf par es) e2):results) 
 --        |e1 == e2       = condenseTree g (min,max) (Leaf par (filter (/=e2) es))
 
 
 instance (Eq a, Predicates p a) => GiSTs GiST p a where
-    search (Leaf par es) p          = [SearchResult (Leaf par es) e | e <- es, consistent (LeafEntry e) p] 
+    search (Leaf par es) p          = [e | e <- es, consistent (LeafEntry e) p] 
     search (Node _ []) _            = []
     search (Node par (e:es)) p
         |consistent (NodeEntry e) p = (search (fst e) p) ++ (search (Node par es) p)
@@ -52,8 +55,7 @@ instance (Eq a, Predicates p a) => GiSTs GiST p a where
     delete gist (min,max) (a,pa) = gist
     condenseTree gist (min,max) gist2 = gist2
     
-    
-    --delete g (min, max) e       =  g (min,max) head (search g e)
+    --delete g (min, max) e   =  condenseTree g (min,max) delete
     
      --class Predicates p a where
 --	consistent :: (Entry a) -> Predicate a-> Bool
