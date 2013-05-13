@@ -1,7 +1,7 @@
 {-# LANGUAGE MultiParamTypeClasses
     ,FlexibleInstances#-}
 
-data GiST p a  = Leaf [LeafEntry p a] | Node [NodeEntry p a]            -- | OrderedLeaf [OrderedLeafEntry a]
+data GiST p a  = Leaf (GiST p a) [LeafEntry p a] | Node (GiST p a) [NodeEntry p a] | Null -- | OrderedLeaf [OrderedLeafEntry a]
 data Entry p a = LeafEntry (LeafEntry p a) | NodeEntry (NodeEntry p a) -- | OrderedEntry(OrderedLeafEntry a) 
 
 
@@ -44,11 +44,11 @@ instance (Eq a) => Predicates Predicate a where
     pickSplit  (e:es) = [es]
 
 instance Eq a => GiSTs GiST p a where
-    search (Leaf es) p              = [e | e <- es, consistent (LeafEntry e) p] 
-    search (Node []) _              = []
-    search (Node (e:es)) p
-        |consistent (NodeEntry e) p = (search (fst e) p) ++ (search (Node es) p)
-        |otherwise                  = search (Node es) p
+    search (Leaf _ es) p              = [e | e <- es, consistent (LeafEntry e) p] 
+    search (Node _ []) _              = []
+    search (Node par (e:es)) p
+        |consistent (NodeEntry e) p = (search (fst e) p) ++ (search (Node par es) p)
+        |otherwise                  = search (Node par es) p
  --class Predicates p a where
 --	consistent :: (Entry a) -> Predicate a-> Bool
 --	union :: [(Entry a)] -> Predicate a
