@@ -4,14 +4,18 @@
 data GiST p a  = Leaf (GiST p a) [LeafEntry p a] | Node (GiST p a) [NodeEntry p a] | Null -- | OrderedLeaf [OrderedLeafEntry a]
 data Entry p a = LeafEntry (LeafEntry p a) | NodeEntry (NodeEntry p a) -- | OrderedEntry(OrderedLeafEntry a) 
 
-
 type LeafEntry p a = (a, p a) 
 --data OrderedLeafEntry a = OLeafEntry (OrderedLeafEntry a) (a,Predicate a) (OrderedLeafEntry a) | Nil
 
 type NodeEntry p a = (GiST p a, p a)
+data SearchResult p a = SearchResult (GiST p a) (LeafEntry p a)
 type Penalty = Integer
 type Level = Integer
-data Predicate a = Predicate (a -> Bool) 
+--data Predicate a = Predicate (a -> Bool) 
+
+instance Eq a => Eq (LeafEntry p a) where
+    (==) (a1,_) (a2,_)   = a1 == a2
+
 
 class Predicates p a  where
     consistent  :: (Entry p a) -> p a -> Bool
@@ -21,7 +25,7 @@ class Predicates p a  where
 
 -- (Integer,Integer paare sind min und max anzahl an entries im baum)
 class (Eq a, Predicates p a) => GiSTs g p a where
-    search          :: g p a -> p a -> [LeafEntry p a]
+    search          :: g p a -> p a -> [SearchResult p a]
     insert          :: g p a -> (Integer,Integer) -> Entry p a -> Level -> g p a
     chooseSubtree   :: g p a -> Entry p a -> Level -> g p a 
     split           :: g p a -> (Integer,Integer) -> g p a -> Entry p a -> g p a
@@ -36,20 +40,31 @@ class (Eq a, Predicates p a) => GiSTs g p a where
 
 
 
-instance (Eq a) => Predicates Predicate a where
+{--instance (Eq a) => Predicates Predicate a where
     consistent e p = True
     union ((LeafEntry (a1,p)):es) = p
     union ((NodeEntry (g, p)):es) = p
     penalty e1 e2 =  0
     pickSplit  (e:es) = [es]
+--}
+
+--delete2 :: (Eq a, Predicates p a, GiSTs g p a) => g p a -> (Integer,Integer) -> LeafEntry p a -> [SearchResult p a] -> g p a
+--delete2 g _ _ []      = g
+--delete2 g (min, max) e1 ((SearchResult (Leaf par es) e2):results) 
+--        |e1 == e2       = condenseTree g (min,max) (Leaf par (filter (/=e2) es))
+
 
 instance (Eq a, Predicates p a) => GiSTs GiST p a where
-    search (Leaf _ es) p              = [e | e <- es, consistent (LeafEntry e) p] 
-    search (Node _ []) _              = []
+    search (Leaf par es) p          = [SearchResult (Leaf par es) e | e <- es, consistent (LeafEntry e) p] 
+    search (Node _ []) _            = []
     search (Node par (e:es)) p
         |consistent (NodeEntry e) p = (search (fst e) p) ++ (search (Node par es) p)
         |otherwise                  = search (Node par es) p
- --class Predicates p a where
+    
+    
+    --delete g (min, max) e       =  g (min,max) head (search g e)
+    
+     --class Predicates p a where
 --	consistent :: (Entry a) -> Predicate a-> Bool
 --	union :: [(Entry a)] -> Predicate a
 --	penalty :: (Entry a) -> (Entry a) -> a
