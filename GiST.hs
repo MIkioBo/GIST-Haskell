@@ -20,14 +20,14 @@ class Predicates p a  where
     pickSplit   :: [(Entry p a)] -> [[Entry p a]]
 
 -- (Integer,Integer paare sind min und max anzahl an entries im baum)
-class (Eq a) => GiSTs g p a where
-    search          :: Predicates p a => g p a -> p a -> [LeafEntry p a]
-    insert          :: Predicates p a => g p a -> (Integer,Integer) -> Entry p a -> Level -> g p a
-    chooseSubtree   :: Predicates p a => g p a -> Entry p a -> Level -> g p a 
-    split           :: Predicates p a => g p a -> (Integer,Integer) -> g p a -> Entry p a -> g p a
-    adjustKeys      :: Predicates p a => g p a -> (Integer,Integer) -> g p a -> g p a
-    delete          :: Predicates p a => g p a -> (Integer,Integer) -> LeafEntry p a -> g p a 
-    condenseTree    :: Predicates p a => g p a -> (Integer,Integer) -> g p a -> g p a
+class (Eq a, Predicates p a) => GiSTs g p a where
+    search          :: g p a -> p a -> [LeafEntry p a]
+    insert          :: g p a -> (Integer,Integer) -> Entry p a -> Level -> g p a
+    chooseSubtree   :: g p a -> Entry p a -> Level -> g p a 
+    split           :: g p a -> (Integer,Integer) -> g p a -> Entry p a -> g p a
+    adjustKeys      :: g p a -> (Integer,Integer) -> g p a -> g p a
+    delete          :: g p a -> (Integer,Integer) -> LeafEntry p a -> g p a 
+    condenseTree    :: g p a -> (Integer,Integer) -> g p a -> g p a
 
 
 --class OrderedGiSTs g a where
