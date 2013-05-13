@@ -43,7 +43,7 @@ instance (Eq a) => Predicates Predicate a where
     penalty e1 e2 =  0
     pickSplit  (e:es) = [es]
 
-instance Eq a => GiSTs GiST p a where
+instance (Eq a, Predicates p a) => GiSTs GiST p a where
     search (Leaf _ es) p              = [e | e <- es, consistent (LeafEntry e) p] 
     search (Node _ []) _              = []
     search (Node par (e:es)) p
