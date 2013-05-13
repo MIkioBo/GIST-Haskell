@@ -31,7 +31,7 @@ class (Eq a, Predicates p a) => GiSTs g p a where
     split           :: g p a -> (Integer,Integer) -> g p a -> Entry p a -> g p a
     adjustKeys      :: g p a -> (Integer,Integer) -> g p a -> g p a
     delete          :: g p a -> (Integer,Integer) -> LeafEntry p a -> g p a 
-    condenseTree    :: g p a -> (Integer,Integer) -> g p a -> g p a
+    condenseTree    :: g p a -> (Integer,Integer) -> g p a
 
 
 
@@ -52,8 +52,15 @@ instance (Eq a, Predicates p a) => GiSTs GiST p a where
     chooseSubtree gist e l = gist 
     split gist (min,max) gist2  e = gist2 
     adjustKeys gist (min,max) gist2 = gist2 
-    delete gist (min,max) (a,pa) = gist
-    condenseTree gist (min,max) gist2 = gist2
+    
+    --delete (Node par []) _ _ = 
+    delete (Node par (es)) (min, max) (a, p) = condenseTree afterDelete (min, max)
+        where afterDelete = (Node par [if (consistent (NodeEntry (subTree, p1)) p) 
+                                            then ((delete subTree (min, max) (a ,p)), p1) 
+                                            else (subTree, p1) 
+                                        | (subTree, p1) <- es])
+        
+    condenseTree node (min,max) = node
     
     --delete g (min, max) e   =  condenseTree g (min,max) delete
     
