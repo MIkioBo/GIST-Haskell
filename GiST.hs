@@ -59,7 +59,9 @@ instance (Eq a, Predicates p a) => GiSTs GiST p a where
                                             then ((delete subTree (min, max) (a ,p)), p1) 
                                             else (subTree, p1) 
                                         | (subTree, p1) <- es])
-        
+    delete (Leaf par (es)) (min, max) (a, p) = condenseTree afterDelete (min, max)
+        where afterDelete = (Leaf par [(a1, p1) | (a1, p1) <- es, not $ consistent (LeafEntry (a1,p1)) p])
+    
     condenseTree node (min,max) = node
     
     --delete g (min, max) e   =  condenseTree g (min,max) delete
