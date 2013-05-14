@@ -58,6 +58,15 @@
 
 \section {Implementation of GiST}
 \begin{frame}%%Eine Folie
+  \frametitle{GiST implementation} %%Folientitel
+  \begin {itemize}
+  \item Structure is similar to normal balanced trees
+  \pause \item Each node (except root) contains kM to M entries
+  \pause \item Internal node entries: (predicate, pointer to child node)
+  \pause \item Leaf node entries: (predicate, pointer to actual data)
+  \end {itemize}
+\end{frame}
+\begin{frame}%%Eine Folie
   \frametitle{Tree Functions} %%Folientitel
   \begin {itemize}
   \item $search :: Predicate \rightarrow GiST \rightarrow [LeafEntry]$
@@ -78,4 +87,14 @@
   \pause \item $pickSplit ::  [Entry] \rightarrow [[Entry]]$
   \end {itemize}
 \end{frame}
+\begin{frame}
+  \frametitle{Summary}
+  \begin {itemize}
+  \item What is GiST?
+  \item Why use GiST?
+  \item Implementation of GiST
+  \item Tree and Key Functuions
+  \end {itemize}
+\end{frame}
+
 \end{document}

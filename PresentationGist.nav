@@ -21,12 +21,16 @@
 \headcommand {\sectionentry {4}{Implementation of GiST}{12}{Implementation of GiST}{0}}
 \headcommand {\beamer@sectionpages {9}{11}}
 \headcommand {\beamer@subsectionpages {9}{11}}
-\headcommand {\slideentry {4}{0}{6}{12/18}{}{0}}
-\headcommand {\beamer@framepages {12}{18}}
-\headcommand {\slideentry {4}{0}{7}{19/22}{}{0}}
-\headcommand {\beamer@framepages {19}{22}}
-\headcommand {\beamer@partpages {1}{22}}
-\headcommand {\beamer@subsectionpages {12}{22}}
-\headcommand {\beamer@sectionpages {12}{22}}
-\headcommand {\beamer@documentpages {22}}
-\headcommand {\def \inserttotalframenumber {7}}
+\headcommand {\slideentry {4}{0}{6}{12/15}{}{0}}
+\headcommand {\beamer@framepages {12}{15}}
+\headcommand {\slideentry {4}{0}{7}{16/22}{}{0}}
+\headcommand {\beamer@framepages {16}{22}}
+\headcommand {\slideentry {4}{0}{8}{23/26}{}{0}}
+\headcommand {\beamer@framepages {23}{26}}
+\headcommand {\slideentry {4}{0}{9}{27/27}{}{0}}
+\headcommand {\beamer@framepages {27}{27}}
+\headcommand {\beamer@partpages {1}{27}}
+\headcommand {\beamer@subsectionpages {12}{27}}
+\headcommand {\beamer@sectionpages {12}{27}}
+\headcommand {\beamer@documentpages {27}}
+\headcommand {\def \inserttotalframenumber {9}}

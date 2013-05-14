@@ -52,17 +52,21 @@ instance (Eq a, Predicates p a) => GiSTs GiST p a where
     chooseSubtree gist e l = gist 
     split gist (min,max) gist2  e = gist2 
     adjustKeys gist (min,max) gist2 = gist2 
+     
+    delete (Node par (es)) (min, max) (a, p) = 
+        condenseTree afterDelete (min, max)
+            where afterDelete = (Node par [if (consistent (NodeEntry (subTree, p1)) p) 
+                                                then ((delete subTree (min, max) (a ,p)), p1) 
+                                                else (subTree, p1) 
+                                            | (subTree, p1) <- es])
+    delete (Leaf par (es)) (min, max) (a, p) = 
+        condenseTree afterDelete (min, max)
+            where afterDelete = (Leaf par [(a1, p1) 
+                                            | (a1, p1) <- es,
+                                            not $ consistent (LeafEntry (a1,p1)) p])
     
-    --delete (Node par []) _ _ = 
-    delete (Node par (es)) (min, max) (a, p) = condenseTree afterDelete (min, max)
-        where afterDelete = (Node par [if (consistent (NodeEntry (subTree, p1)) p) 
-                                            then ((delete subTree (min, max) (a ,p)), p1) 
-                                            else (subTree, p1) 
-                                        | (subTree, p1) <- es])
-    delete (Leaf par (es)) (min, max) (a, p) = condenseTree afterDelete (min, max)
-        where afterDelete = (Leaf par [(a1, p1) | (a1, p1) <- es, not $ consistent (LeafEntry (a1,p1)) p])
-    
-    condenseTree node (min,max) = node
+    condenseTree (Leaf par (es)) (min, max) =
+         
     
     --delete g (min, max) e   =  condenseTree g (min,max) delete
     
