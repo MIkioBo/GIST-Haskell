@@ -1,0 +1,59 @@
+ 17     (==) (a1,_) (a2,_)   = a1 == a2
+ 18
+ 19
+ 20 class Predicates p a  where
+ 21     consistent  :: (Entry p a) -> p a -> Bool
+ 22     union       :: [(Entry p a)] -> p a
+ 23     penalty     :: (Entry p a) -> (Entry p a) -> Penalty
+ 24     pickSplit   :: [(Entry p a)] -> [[Entry p a]]
+ 25
+ 26 -- (Integer,Integer paare sind min und max anzahl an entries im baum)
+ 27 class (Eq a, Predicates p a) => GiSTs g p a where
+ 28     search          :: g p a -> p a -> [LeafEntry p a]
+ 29     insert          :: g p a -> (Integer,Integer) -> Entry p a -> Level -> g p a
+ 30     chooseSubtree   :: g p a -> Entry p a -> Level -> g p a
+ 31     split           :: g p a -> (Integer,Integer) -> g p a -> Entry p a -> g p a
+ 32     adjustKeys      :: g p a -> (Integer,Integer) -> g p a -> g p a
+ 33     delete          :: g p a -> (Integer,Integer) -> LeafEntry p a -> g p a
+ 34     condenseTree    :: g p a -> (Integer,Integer) -> g p a
+ 35
+ 36
+ 37
+ 38 --delete2 g (min, max) e1 ((SearchResult (Leaf par es) e2):results)
+ 39 --deleteFromNode :: (Eq a, Predicates p a) => (Integer,Integer) -> LeafEntry p a -> [SearchResult p a] -> g p a
+ 40 --deleteFromNode g _ _ []      = g
+ 41 --deleteFromNode g (min, max) e1 ((SearchResult (Leaf par es) e2):results)
+ 42 --        |e1 == e2       = condenseTree g (min,max) (Leaf par (filter (/=e2) es))
+ 43
+ 44
+ 45 instance (Eq a, Predicates p a) => GiSTs GiST p a where
+ 46     search (Leaf par es) p          = [e | e <- es, consistent (LeafEntry e) p]
+ 47     search (Node _ []) _            = []
+ 48     search (Node par (e:es)) p
+ 49         |consistent (NodeEntry e) p = (search (fst e) p) ++ (search (Node par es) p)
+ 50         |otherwise                  = search (Node par es) p
+ 51     insert gist (min,max) (LeafEntry e) l       = -- (Node par [ (subTree,p1) |(subTree, p1)<-(chooseSubtree (Node par es) e l)])
+ 52                                                 case (chooseSubtree gist (LeafEntry e) l) of
+ 53                                                 (Leaf par xs) ->(Leaf par (xs++[(Leafentry e)]) )  --split gist (min,max) gist e
+ 54                                                 (Node par es) -> split gist (min,max) gist(LeafEntry e)
+ 55
+ 56
+ 57     chooseSubtree gist e l = gist
+ 58     split gist (min,max) gist2  e = gist2
+ 59     adjustKeys gist (min,max) gist2 = gist2
+ 60
+ 61     --delete (Node par []) _ _ =
+ 62     delete (Node par (es)) (min, max) (a, p) = condenseTree afterDelete (min, max)
+ 63         where afterDelete = (Node par [if (consistent (NodeEntry (subTree, p1)) p)
+ 64                                             then ((delete subTree (min, max) (a ,p)), p1)
+ 65                                             else (subTree, p1)
+ 66                                         | (subTree, p1) <- es])
+ 67
+ 68     condenseTree node (min,max) = node
+ 69
+ 70     --delete g (min, max) e   =  condenseTree g (min,max) delete
+ 71
+ 72      --class Predicates p a where
+ 73 --  consistent :: (Entry a) -> Predicate a-> Bool
+ 74 --  union :: [(Entry a)] -> Predicate a
+"GiST.hs" 96L, 4041C written                                                                                                                                                                                               53,92         42%
