@@ -40,7 +40,7 @@ class (Predicates p a) => GiSTs g p a where
     search  :: g p a -> p a -> [LeafEntry p a]
     -- | Inserts an entry into the tree, rebalancing the tree if necessary
     insert  :: g p a -> (Int, Int) -> LeafEntry p a -> Level -> g p a
-       -- | Deletes a leaf entry from the tree and rebalances if necessary 
+    -- | Deletes a leaf entry from the tree and rebalances if necessary 
     delete  :: g p a -> (Int, Int) -> LeafEntry p a -> g p a 
-    
+    -- | Creates a new empty GiST
     empty   :: g p a 
