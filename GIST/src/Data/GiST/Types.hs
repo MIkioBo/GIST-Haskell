@@ -1,11 +1,12 @@
 {-# LANGUAGE MultiParamTypeClasses
     ,FlexibleInstances
-    ,FlexibleContexts#-}
+    ,FlexibleContexts
+    #-}
 
 module Data.GiST.Types where
 
-data GiST p a  = Leaf [LeafEntry p a] | Node [NodeEntry p a] | Null deriving (Eq, Show) -- | OrderedLeaf [OrderedLeafEntry a]
-data Entry p a = LeafEntry (LeafEntry p a) | NodeEntry (NodeEntry p a) deriving (Eq, Show) -- | OrderedEntry(OrderedLeafEntry a) 
+data GiST p a  = Leaf [LeafEntry p a] | Node [NodeEntry p a] | Null deriving (Eq, Show, Read)
+data Entry p a = LeafEntry (LeafEntry p a) | NodeEntry (NodeEntry p a) deriving (Eq, Show, Read) 
 
 unLeafEntry  (LeafEntry l) =  l
 unNodeEntry  (NodeEntry n) =  n
@@ -18,7 +19,6 @@ type LeafEntry p a = (a, p a)
 type NodeEntry p a = (GiST p a, p a)
 
 type Penalty = Int
-type Level = Int
 
 instance  (Eq a, Ord (p a)) => Ord (Entry p a) where
     (>) (LeafEntry (_,p1)) (LeafEntry (_,p2)) = p1 > p2
@@ -35,12 +35,4 @@ class (Eq a, Eq (p a)) => Predicates p a where
     -- Focus is on minimising the fill factor
     pickSplit   :: [Entry p a] -> ([Entry p a], [Entry p a])
 
-class (Predicates p a) => GiSTs g p a where
-    -- | Searches the GiST for leaf nodes that satisfy the given search predicate
-    search  :: g p a -> p a -> [LeafEntry p a]
-    -- | Inserts an entry into the tree, rebalancing the tree if necessary
-    insert  :: g p a -> (Int, Int) -> LeafEntry p a -> Level -> g p a
-    -- | Deletes a leaf entry from the tree and rebalances if necessary 
-    delete  :: g p a -> (Int, Int) -> LeafEntry p a -> g p a 
-    -- | Creates a new empty GiST
-    empty   :: g p a 
+
