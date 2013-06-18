@@ -21,8 +21,10 @@ type NodeEntry p a = (GiST p a, p a)
 type Penalty = Int
 
 instance  (Eq a, Ord (p a)) => Ord (Entry p a) where
-    (>) (LeafEntry (_,p1)) (LeafEntry (_,p2)) = p1 > p2
-    (>) (NodeEntry (_,p1)) (NodeEntry (_,p2)) = p1 > p2
+    (<=) (LeafEntry (_,p1)) (LeafEntry (_,p2)) = p1 <= p2
+    (<=) (NodeEntry (_,p1)) (NodeEntry (_,p2)) = p1 <= p2
+    (<=) (NodeEntry (_,p1)) (LeafEntry (_,p2)) = p1 <= p2
+    (<=) (NodeEntry (_,p1)) (LeafEntry (_,p2)) = p1 <= p2
 
 class (Eq a, Eq (p a)) => Predicates p a where
     -- | Checks if the given entry is consistent with a given predicate
