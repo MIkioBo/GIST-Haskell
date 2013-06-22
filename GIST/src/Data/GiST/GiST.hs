@@ -9,7 +9,7 @@ import Data.GiST.Types
 
 class (Predicates p a) => GiSTs g p a where
     -- | Searches the GiST for leaf nodes that satisfy the given search predicate
-    search  :: p a -> g p a -> [LeafEntry p a]
+    search  :: p a -> g p a -> [a]
     -- | Inserts an entry into the tree, rebalancing the tree if necessary
     insert  :: LeafEntry p a -> (Int, Int) -> g p a -> g p a
     -- | Deletes a leaf entry from the tree and rebalances if necessary 
@@ -19,17 +19,18 @@ class (Predicates p a) => GiSTs g p a where
 
 instance (Predicates p a) => GiSTs GiST p a where
 
-    search  p (Leaf es)     = [e | e <- es, consistent p (LeafEntry e)] 
+    search  p (Leaf es)     = [fst e | e <- es, consistent p (LeafEntry e)] 
     search  _ (Node [])     = []
     search  p (Node (e:es))
         |consistent p (NodeEntry e) = (search p (fst e)) ++ (search p (Node es))
         |otherwise                  = search p (Node es)
   
     
-    insert (toIns, pred) (min,max) (Node es) 
+    insert (toIns, pred) (min,max) (Node es)
+            |search pred (Node es) /= [] = Node es
             |length newEs2 <= max   =  Node newEs2
-            |otherwise              = Node [(Node $ map unNodeEntry es1, union es1)
-                                        ,(Node $ map unNodeEntry es2, union es2)] 
+            |otherwise              = Node [(Node $ map unNodeEntry es1, union $ map entryPredicate es1)
+                                        ,(Node $ map unNodeEntry es2, union $ map entryPredicate es2)] 
                 -- | The new entries after inserting
         where   newEs =  [if (e == minSubtree)
                             then oldSub
@@ -45,9 +46,10 @@ instance (Predicates p a) => GiSTs GiST p a where
                 (es1,es2) =  pickSplit $ map NodeEntry newEs2 
              
     insert (toIns, p) (min,max) (Leaf es)
+            |search p (Leaf es) /= [] = Leaf es
             |length newEs <= max    = Leaf newEs
-            |otherwise              = Node [(Leaf $ map unLeafEntry es1,union es1)
-                                        ,(Leaf $ map unLeafEntry es2, union es2)] 
+            |otherwise              = Node [(Leaf $ map unLeafEntry es1,union $ map entryPredicate es1)
+                                        ,(Leaf $ map unLeafEntry es2, union $ map entryPredicate es2)] 
                 -- | The new entries after insert
         where   newEs = (toIns, p):es
                 -- | The split of the node entries (in case of overpopulation)
@@ -77,7 +79,7 @@ instance (Predicates p a) => GiSTs GiST p a where
 deleteAndCondense :: (Predicates p a) => NodeEntry p a -> (Int,Int) -> LeafEntry p a -> (NodeEntry p a, [LeafEntry p a])
 deleteAndCondense (Node es, pred) (min, max) (toDel, p)
         |length newEs < min = ((Null, pred), toAdd ++ getEntries (Node es))   
-        |otherwise          = ((Node newEs, union $ map NodeEntry newEs), toAdd)
+        |otherwise          = ((Node newEs, union $ map snd newEs), toAdd)
             -- | The new entries after delete without Null entries
     where   newEs = filter (not.isNull) (map fst delNodes)  
             -- | The propagated entries to add
@@ -90,7 +92,7 @@ deleteAndCondense (Node es, pred) (min, max) (toDel, p)
 
 deleteAndCondense ((Leaf es),pred) (min, max) (toDel, p) 
     |length newEs < min = ((Null,pred), newEs)
-    |otherwise          = ((Leaf newEs, union $ map LeafEntry newEs),[])        
+    |otherwise          = ((Leaf newEs, union $ map snd newEs),[])        
                 -- | The new entries after delete without Null entries
         where   newEs = [e | e <- es, not $ consistent p (LeafEntry e)] 
 
@@ -99,8 +101,9 @@ deleteAndCondense ((Leaf es),pred) (min, max) (toDel, p)
 -- | A helper function that propagates insertion through the subtrees        
 insertGiST :: (Predicates p a) => NodeEntry p a -> (Int,Int) -> LeafEntry p a -> (NodeEntry p a, NodeEntry p a)
 insertGiST (Node es,p) (min,max) (toIns,pred)
-            |length newEs2 <= max  =  ((Node newEs2,union $ map NodeEntry (newEs2)),(Null, p) )
-            |otherwise =((Node  (map unNodeEntry es1), union es1),(Node (map unNodeEntry es2), union   es2) ) 
+            |length newEs2 <= max  =  ((Node newEs2,union $ map snd newEs2),(Null, p) )
+            |otherwise =((Node  (map unNodeEntry es1), union $ map entryPredicate es1)
+                        ,(Node (map unNodeEntry es2), union $ map entryPredicate es2)) 
                 -- | The new entries after insert
         where   newEs =   [if (e == minSubtree)
                             then oldSub 
@@ -117,8 +120,9 @@ insertGiST (Node es,p) (min,max) (toIns,pred)
                 (es1,es2) =  pickSplit $ map NodeEntry newEs 
 
 insertGiST (Leaf es,p) (min,max) (toIns,pred)
-            |length newEs <= max  =  ((Leaf newEs,union $ map LeafEntry (newEs)),(Null, p) )
-            |otherwise =((Leaf (map unLeafEntry es1), union  es1),(Leaf (map unLeafEntry es2), union es2) ) 
+            |length newEs <= max  =  ((Leaf newEs,union $ map snd newEs),(Null, p) )
+            |otherwise =((Leaf (map unLeafEntry es1), union $ map entryPredicate es1)
+                        ,(Leaf (map unLeafEntry es2), union $ map entryPredicate es2)) 
             -- | The optimal subtree to insert into
     where   newEs = ((toIns,pred) : es)
             -- | The split of the node entries (in case of overpopulation)
@@ -137,7 +141,7 @@ insertMultiple (e:es) gist (min,max) = insertMultiple es afterInsert (min,max)
 -- | Chooses the most appropriate subtree to insert the entry into
 chooseSubtree   :: (Predicates p a )=>[(NodeEntry p a)] -> LeafEntry p a -> (NodeEntry p a) 
 chooseSubtree subtrees e    = minPenalty penalties (head penalties)
-        where   penalties = [(ne, penalty e ne)|ne <- subtrees]
+        where   penalties = [(ne, penalty (snd e) (snd ne))|ne <- subtrees]
 
 
 -- | Return the minimum penalty and corresponding entry from a list od entries and penalties

@@ -24,15 +24,16 @@ instance  (Eq a, Ord (p a)) => Ord (Entry p a) where
     (<=) (LeafEntry (_,p1)) (LeafEntry (_,p2)) = p1 <= p2
     (<=) (NodeEntry (_,p1)) (NodeEntry (_,p2)) = p1 <= p2
     (<=) (NodeEntry (_,p1)) (LeafEntry (_,p2)) = p1 <= p2
-    (<=) (NodeEntry (_,p1)) (LeafEntry (_,p2)) = p1 <= p2
+    (<=) (LeafEntry (_,p1)) (NodeEntry (_,p2)) = p1 <= p2
 
 class (Eq a, Eq (p a)) => Predicates p a where
     -- | Checks if the given entry is consistent with a given predicate
     consistent  :: p a -> Entry p a -> Bool
     -- | Returns a predicate that is the union of all predicates of the given list of entries
-    union       :: [Entry p a] -> p a
-    -- | Calculates a numerical penalty for inserting the first entry into a subtree rooted in the second
-    penalty     :: LeafEntry p a -> NodeEntry p a -> Penalty
+    union       :: [p a] -> p a
+    -- | Calculates a numerical penalty for inserting the entry containing the first predicate 
+    -- into a subtree rooted at an entry containing the second predicate
+    penalty     :: p a -> p a -> Penalty
     -- | Given a list of entries, returns two disjunct subsets that contain the entries in the list
     -- Focus is on minimising the fill factor
     pickSplit   :: [Entry p a] -> ([Entry p a], [Entry p a])
