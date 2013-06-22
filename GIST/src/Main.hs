@@ -26,10 +26,10 @@ main =  do
         exitFailure
     if (head flags == BTree ) then do
         gist <- (load "BTreeGiST.txt" :: IO (GiST BTree.Predicate Int))
-        executeOperationB gist $ head $ tail flags
+        executeOperationB gist (flags!!1)
     else do
         gist <- (load "RTreeGiST.txt" :: IO (GiST RTree.Predicate (Int,Int)))
-        executeOperationR gist $ head $ tail flags
+        executeOperationR gist  (flags!!1)
     
     
     
