@@ -18,23 +18,27 @@ overlaps ((minx1,maxy1),(maxx1,miny1)) ((minx2,maxy2),(maxx2,miny2)) =  (minx1 <
                                                                 && (minx2 <= maxx1)
                                                                 && (miny1 <= maxy2)
                                                                 && (miny2 <= maxy1)
-
+-- | The lower limit for the x coordinate of the predicate
 minxP :: Predicate (a,a) -> a
 minxP (Contains ((minx,_),(_,_))) = minx
 minxP (Equals (x,_)) = x
 
+-- | The upper limit for the y coordinate of the predicate
 maxyP :: Predicate (a,a) -> a
 maxyP (Contains ((_,maxy),(_,_))) = maxy
 maxyP (Equals (_,y)) = y 
 
+-- | The upper limit for the x coordinate of the predicate
 maxxP :: Predicate (a,a) -> a
 maxxP (Contains ((_,_),(maxx,_))) = maxx
 maxxP (Equals (x,_)) = x
 
+-- | The lower limit for the y coordinate of the predicate
 minyP :: Predicate (a,a) -> a
 minyP (Contains ((_,_),(_,miny))) = miny
 minyP (Equals (_,y)) = y
 
+-- | The area covered by the predicate
 area :: Predicate (Int,Int) -> Int
 area (Equals _) = 0
 area (Contains ((minx,maxy),(maxx,miny))) = (maxx - minx) * (maxy - miny)
@@ -64,21 +68,18 @@ instance Predicates Predicate (Int,Int) where
                 -- | The minimum of all y interval minimums
                 miny    = minimum $ map minyP ps
 
-    -- | Seperates the sorted list of entries into two halves
+    -- | Seperates the sorted list of entries into two halves using the linear split algorithm
     pickSplit es = linearSplit [e1] [e2] [e | e <- es, e /= e1, e/= e2] $ (length es + 1) `div` 2
+        -- | At tuple containing the two most disparate entries in the list and their penalty
         where (_, e1, e2) = maximum [greatestPenalty e es | e <- es]
 
     penalty p1 p2  =  area (union [p1,p2]) - area p2
 
---unionP :: [Predicate Int] -> Predicate Int
---unionP 
---penaltyP :: Predicate Int -> Predicate Int -> Penalty
---penaltyP p1 p2  =  area (union [p1,p2]) - area p2
-
+-- | Returns a tuple containing the greatest penalty between an entry and list of entries with the corresponding coordinates
 greatestPenalty :: Entry Predicate (Int,Int) -> [Entry Predicate (Int,Int)] -> (Penalty, Entry Predicate (Int,Int), Entry Predicate (Int,Int))
 greatestPenalty e es = maximum [(penalty (entryPredicate e) (entryPredicate e1), e, e1) | e1 <- es]
 
-
+-- | Implementation of the linear split algorithm taking the minimal fill factor into account
 linearSplit :: [Entry Predicate (Int, Int)] -> [Entry Predicate (Int,Int)] -> 
     [Entry Predicate (Int,Int)] -> Int -> ([Entry Predicate (Int,Int)], [Entry Predicate (Int,Int)])
 linearSplit es1 es2 [] _ = (es1,es2)

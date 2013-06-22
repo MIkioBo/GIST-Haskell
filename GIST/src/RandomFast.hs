@@ -15,6 +15,8 @@ import System.Console.GetOpt
 import qualified Data.Text.IO as TIO
 import qualified Data.Text as T
 
+-- | A small programm that allows the user to add any number of random elements to a GiST saved on a file
+-- The data is written after all the insertions are finished
 main    :: IO()
 main =  do
     args <- getArgs  
@@ -49,11 +51,6 @@ options = [
   ]
    
     
-    
-    {--outh <- openFile "GiST.txt" WriteMode
-    hPutStrLn outh $ show $ (empty :: GiST BTreePredicate Int) 
-    hClose outh--}
-
 load :: (Read a) => FilePath -> IO a
 load f = do s <- TIO.readFile f
             return (read $ T.unpack s)
@@ -73,13 +70,3 @@ executeOperationR gist max num gen = executeOperationR inserted max (num-1) g2
     where   inserted = insert ((x,y), RTree.Equals (x,y)) (3,6) gist
             (x,g) = randomR (1,max) gen
             (y,g2) = randomR (1,max) g
-{--           
-            do
-    gist <- (load file :: IO (GiST RTree.Predicate (Int,Int)))
-    let (x,g) = randomR (1,max) gen
-    let (y,g2) = randomR (1,max) g
-    putStrLn $ show $ length $ getEntries gist
-    --putStrLn $ show (x,y)
-    --putStrLn $ show gist
-    save (insert ((x,y), RTree.Equals (x,y)) (3,6) gist) file
-    executeOperationR file max (num-1) g2 --}

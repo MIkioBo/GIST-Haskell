@@ -5,12 +5,15 @@
 
 module Data.GiST.Types where
 
+-- | The data structure representing the gist
 data GiST p a  = Leaf [LeafEntry p a] | Node [NodeEntry p a] | Null deriving (Eq, Show, Read)
+-- | A general entry type for the gist
 data Entry p a = LeafEntry (LeafEntry p a) | NodeEntry (NodeEntry p a) deriving (Eq, Show, Read) 
 
 unLeafEntry  (LeafEntry l) =  l
 unNodeEntry  (NodeEntry n) =  n
 
+-- | Returns the predicate of this entry
 entryPredicate (LeafEntry e) = snd e
 entryPredicate (NodeEntry e) = snd e
 
@@ -20,6 +23,8 @@ type NodeEntry p a = (GiST p a, p a)
 
 type Penalty = Int
 
+-- | Ord instance for the entries
+-- Comparison only based on the predicate
 instance  (Eq a, Ord (p a)) => Ord (Entry p a) where
     (<=) (LeafEntry (_,p1)) (LeafEntry (_,p2)) = p1 <= p2
     (<=) (NodeEntry (_,p1)) (NodeEntry (_,p2)) = p1 <= p2

@@ -15,6 +15,9 @@ import System.Console.GetOpt
 import qualified Data.Text.IO as TIO
 import qualified Data.Text as T
 
+
+-- | A small programm that allows the user to add any number of random elements to a GiST saved on a file
+-- The GiST is written after every insert
 main    :: IO()
 main =  do
     args <- getArgs  

@@ -10,11 +10,12 @@ import Data.List(sort)
 data Predicate a = Contains (a,a) | Equals a deriving (Eq, Ord, Show, Read)
 
 
-
+-- | The lower limit of the predicate
 minP :: Predicate a -> a
 minP (Contains (min,_)) = min
 minP (Equals a) = a
 
+-- | The upper limit of the predicate
 maxP :: Predicate a -> a
 maxP (Contains (_,max)) = max
 maxP (Equals a) = a

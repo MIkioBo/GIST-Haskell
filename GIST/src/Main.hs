@@ -14,6 +14,7 @@ import System.Console.GetOpt
 import qualified Data.Text.IO as TIO
 import qualified Data.Text as T
 
+-- | A small programm used vor adding, deleting or searching data in a GiST saved on a file
 main    :: IO()
 main =  do
     args <- getArgs  
@@ -45,11 +46,6 @@ options = [
   ]
    
     
-    
-    {--outh <- openFile "GiST.txt" WriteMode
-    hPutStrLn outh $ show $ (empty :: GiST BTreePredicate Int) 
-    hClose outh--}
-
 load :: (Read a) => FilePath -> IO a
 load f = do s <- TIO.readFile f
             return (read $ T.unpack s)
