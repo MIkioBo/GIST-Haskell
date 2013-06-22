@@ -3,7 +3,7 @@
     ,FlexibleContexts
     #-}
 
-module Data.GiST.GiST (module Data.GiST.Types, GiSTs(..)) where
+module Data.GiST.GiST (module Data.GiST.Types, GiSTs(..), getEntries) where
 
 import Data.GiST.Types
 
@@ -117,7 +117,7 @@ insertGiST (Node es,p) (min,max) (toIns,pred)
                 -- | New entries after possible addition of splitted subtree
                 newEs2 = if ((fst newSub) == Null) then newEs else newSub:newEs
                 -- | The split of the node entries (in case of overpopulation)
-                (es1,es2) =  pickSplit $ map NodeEntry newEs 
+                (es1,es2) =  pickSplit $ map NodeEntry newEs2 
 
 insertGiST (Leaf es,p) (min,max) (toIns,pred)
             |length newEs <= max  =  ((Leaf newEs,union $ map snd newEs),(Null, p) )

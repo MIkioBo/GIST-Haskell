@@ -1,7 +1,7 @@
 {-# LANGUAGE MultiParamTypeClasses
     #-}
 
-module Random where
+module RandomFast where
 
 import System.IO
 import System.Exit
@@ -27,16 +27,16 @@ main =  do
         exitFailure
     if (head flags == BTree ) then do
         let gist = empty :: GiST BTree.Predicate Int
-        let file = "BTreeRandom.txt"
-        save gist file
         g <- newStdGen
-        executeOperationB file (read $ nonOpt!!0) (read $ nonOpt!!1) g
+        let file = "BTreeRandom.txt"
+        save (executeOperationB gist (read $ nonOpt!!0) (read $ nonOpt!!1) g) file
+        
     else do
         let gist = empty :: GiST RTree.Predicate (Int,Int)
-        let file = "RTreeRandom.txt"
-        save gist file
         g <- newStdGen
-        executeOperationR file (read $ nonOpt!!0) (read $ nonOpt!!1) g
+        let file = "RTreeRandom.txt"
+        save (executeOperationR gist (read $ nonOpt!!0) (read $ nonOpt!!1) g) file
+        
     
     
     
@@ -61,20 +61,20 @@ load f = do s <- TIO.readFile f
 save :: (Show a) => a -> FilePath -> IO ()
 save x f = TIO.writeFile f $ T.pack (show x)
 
-executeOperationB :: String -> Int -> Int -> StdGen -> IO()
-executeOperationB _ _ 0 _ = return()
-executeOperationB file max num gen = do     
-    gist <- (load file :: IO (GiST BTree.Predicate Int))
-    let (key,g) = randomR (1,max) gen
-    putStrLn $ show $ length $ getEntries gist
-    --putStrLn $ show key
-    --putStrLn $ show gist
-    save (insert (key, BTree.Equals key) (3,6) gist) file
-    executeOperationB file max (num-1) g
+executeOperationB :: GiST BTree.Predicate Int -> Int -> Int -> StdGen -> GiST BTree.Predicate Int
+executeOperationB g _ 0 _ = g
+executeOperationB gist max num gen = executeOperationB inserted max (num-1) g
+    where   inserted = insert (key, BTree.Equals key) (3,6) gist
+            (key,g) = randomR (1,max) gen
 
-executeOperationR :: String -> Int -> Int -> StdGen -> IO()
-executeOperationR _ _ 0 _ = return()
-executeOperationR file max num gen  = do
+executeOperationR :: GiST RTree.Predicate (Int,Int) -> Int -> Int -> StdGen -> GiST RTree.Predicate (Int,Int)
+executeOperationR g _ 0 _ = g
+executeOperationR gist max num gen = executeOperationR inserted max (num-1) g2
+    where   inserted = insert ((x,y), RTree.Equals (x,y)) (3,6) gist
+            (x,g) = randomR (1,max) gen
+            (y,g2) = randomR (1,max) g
+{--           
+            do
     gist <- (load file :: IO (GiST RTree.Predicate (Int,Int)))
     let (x,g) = randomR (1,max) gen
     let (y,g2) = randomR (1,max) g
@@ -82,4 +82,4 @@ executeOperationR file max num gen  = do
     --putStrLn $ show (x,y)
     --putStrLn $ show gist
     save (insert ((x,y), RTree.Equals (x,y)) (3,6) gist) file
-    executeOperationR file max (num-1) g2
+    executeOperationR file max (num-1) g2 --}
