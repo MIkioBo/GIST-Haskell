@@ -1,0 +1,69 @@
+\documentclass{scrartcl}
+ 
+\usepackage[utf8]{inputenc}
+ 
+\title{Technical Report}
+\author{Mihail Bogojeski (1127083) and Alexander Svozil(1026213)}
+\date{}
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+ \section {Abstract}
+    This report is abouti our implementation of the GiST data structure in the programming language Haskell.
+    We used  Generalized Search Trees for Database Systems by Joseph M. Hellerstein, Jeffrey F. Naughton, 
+    Avi Pfeffer as a reference for our implementation. We provided the basic tree structure, that can handle any 
+    instance of the class Predicates. We also provided two basic predicates that can be used to implement the B+Tree and
+    the R-Tree.
+\newpage
+
+ \section{Introduction}
+ We were introduced to the GiST by our haskell professor Andreas Frank in the scope the lecture "Haskell Practice". 
+ Since we were both interested in the GiST datastructure we decided to do the GiST project together as our "Haskell Practice" - project.
+ 
+ The GiST is a balanced tree structure that works on any datatype with any function (predicate) as long as it implements
+ a certain set of functions. This allows the user of the GiST to create and test new types of balanced search trees easily.
+
+ The GiST works by passing functions (predicates) as keys and saving them in the data structure.
+ This way of handling functions (predicates) is perfect for haskell, as they are first-class entities in the haskell programming language.
+ This is the reason why we thought the code would be very simple and elegant if we used haskell for this implementation.
+
+ \section{Implementation}
+
+ After reading the above mentioned paper "Generalized Search Trees for Database Systems" thoroughly to understand how the GiST data structure works we started to plan our basic
+ data types for the GiST. We decided to make it purely functional because we saw no need for monads or similar concepts since the pure functional approach is simpler and safer.
+ 
+
+ The data type is a recursive tree structure and the downside of using such data types in haskell is that you have to rebuild the bottom with every recursion.
+ We also implemented the class definitions for the predicate and the gist tree itself, with functions similar to the ones specified in the paper. 
+ We later understood, that we don't need the GiST class since the user doesn't need to build any instances of this class (The GiST tree is only implemented once and should work
+ for every function (predicate)). This why we no longer have a GiST class in our program and we export only the functions the user needs to manipulate the GiST structure.
+\subsection{The Tree Functions}
+The functions exported to the user are: insert, search, delete (suggested by the paper) and a few functions that we considered are necessary to make the GiST persistent (as proposed by Professor Andreas Frank).
+These additional functions are: save (writes a GiST persistently in a file), load(reads and parses a GiST saved in file) and empty (simply returns empty GiST with no entries).
+The paper listed a couple of other functions like chooseSubtree, split, adjustKeys and condenseTree, but these functions are only helper functions for insert and delete.
+Because the user doesn't need to use these helper functions himself, they were only implemented in the code but not exported for the user. 
+We also left out a couple of functions that were suggested by the paper for the Predicates class (compress and decompress), because these functions are optional and for optimization and
+we decided to that optimization comes after functionality.
+After we started our implementation, we met a few hurdles with the recursive implementation of insert and delete: This was one of the main reasons for the above mentioned function refactorization since we needed
+to adapt the imperative pseudo-code in the paper to the functional paradigm. 
+After experimenting with the structure of the delete recursive function we finally found an effective way of traversing and rebuilding the tree after deletion. We did this
+by having one function for the root nodes which are a special case in the algorithm.
+We then implemented another function for the subtrees which returned information about the changes in the current subtree to the function caller, which is always the parent
+of the subtree. When we saw that this approach worked well we adapted and used it for insert method. The search method was the easiest to implement since traversing data structures without changing 
+them, is simple to implement in haskell. With this the implementation of the GiST structure was done and one was now able to program the predicates that would influence the data structures behaviour.
+
+\subsection{The predicate functions}
+
+\subsection{Testing}
+
+
+\section{Conclusion}
+
+Initially we thought it would be very easy to implement the GiST structures but as mentioned before we already had some problems early on. But by surpassing 
+these hurdles we learned a lot about manipulating recursive data structures and the final program worked better than we expected. Because we also uploaded
+this package to hackage we learned to factorize our code to packages and how to use the haddock documentation. When writing the test programs we also used the IO Monad,
+which we hadn't used before and by this we also learned how to create safe side effects in haskell. 
+
+
+\end{document}
