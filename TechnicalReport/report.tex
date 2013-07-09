@@ -51,7 +51,7 @@ After experimenting with the structure of the delete recursive function we final
 by having one function for the root nodes which are a special case in the algorithm.
 We then implemented another function for the subtrees which returned information about the changes in the current subtree to the function caller, which is always the parent
 of the subtree. When we saw that this approach worked well we adapted and used it for insert method. The search method was the easiest to implement since traversing data structures without changing 
-them, is simple to implement in haskell. With this the implementation of the GiST structure was done and one was now able to program the predicates that would influence the data structures behaviour.
+them, is simple to implement in haskell. With this the implementation of the GiST structure was done and we were now able to program the predicates that would influence the data structures behaviour.
 
 \subsection{The predicate functions}
 
