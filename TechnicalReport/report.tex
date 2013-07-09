@@ -18,68 +18,70 @@
 \newpage
 
  \section{Introduction}
- We were introduced to the GiST by our haskell professor Andreas Frank in the scope the lecture "Haskell Practice". 
- Since we were both interested in the GiST datastructure we decided to do the GiST project together as our "Haskell Practice" - project.
+ We were introduced to the GiST by our haskell professor Andreas Frank in the scope of the lecture "Haskell Practice". 
+ Since we were both interested in the GiST data structure, we decided to do the GiST project together as our "Haskell Practice" - project.
  
- The GiST is a balanced tree structure that works on any datatype with any function (predicate) as long as it implements
+ The GiST is a balanced tree structure that works on any data type with any queries as long as it implements
  a certain set of functions. This allows the user of the GiST to create and test new types of balanced search trees easily.
 
  The GiST works by passing functions (predicates) as keys and saving them in the data structure.
- This way of handling functions (predicates) is perfect for haskell, as they are first-class entities in the haskell programming language.
- This is the reason why we thought the code would be very simple and elegant if we used haskell for this implementation.
+ This way of handling functions (predicates) is perfect for haskell, as they are the first-class entities in the haskell programming language.
+ This is the reason we thought the code would be very simple and elegant, if we used haskell for this implementation.
 
  \section{Implementation}
 
- After reading the above mentioned paper "Generalized Search Trees for Database Systems" \cite{Hellerstein95generalizedsearch} thoroughly to understand how the GiST data structure works we started to plan our basic
- data types for the GiST. We decided to make it purely functional because we saw no need for monads or similar concepts since the pure functional approach is simpler and safer.
+ After reading the above mentioned paper "Generalized Search Trees for Database Systems" \cite{Hellerstein95generalizedsearch} thoroughly to understand how the GiST data structure works, we started to plan our basic
+ data types for the GiST. We decided to make it purely functional, because we saw no need for monads or similar concepts, since the pure functional approach is simpler and safer.
  
 
  The data type is a recursive tree structure, which has the downside of having to rebuild the data structure from the bottom with every recursion.
- We also implemented the class definitions for the predicate and the gist tree itself, with functions similar to the ones specified in the paper. 
- We later understood, that we don't need the GiST class since the user doesn't need to build any instances of this class (The GiST tree is only implemented once and should work
+ We also implemented the class definitions for the predicate and the GiST itself, with functions similar to the ones specified in the paper \cite{Hellerstein95generalizedsearch}. 
+ We later understood that we didn't need the GiST class, since the user doesn't need to build any instances of this class (The GiST tree is only implemented once and should work
  for every function (predicate)). This why we no longer have a GiST class in our program and we export only the functions the user needs to manipulate the GiST structure.
-\subsection{The tree Functions}
-The functions exported to the user are: insert, search, delete (suggested by the paper) and a few functions that we considered are necessary to make the GiST persistent (as proposed by Professor Andreas Frank).
-These additional functions are: save (writes a GiST persistently in a file), load(reads and parses a GiST saved in file) and empty (simply returns empty GiST with no entries).
+\subsection{The tree functions}
+The tree functions exported to the user are: insert, search, delete (suggested by the paper) and a few functions that we considered necessary to make the GiST persistent (as proposed by Professor Andreas Frank).
+These additional functions are: save (writes a GiST persistently in a file), load(reads and parses a GiST saved in a file) and empty (simply returns empty GiST with no entries).
 The paper \cite{Hellerstein95generalizedsearch} listed a couple of other functions like chooseSubtree, split, adjustKeys and condenseTree, but these functions are only helper functions for insert and delete.
 Because the user doesn't need to use these helper functions himself, they were only implemented in the code but not exported for the user.
-We also left out a couple of functions that were suggested by the paper for the Predicates class (compress and decompress), because these functions are optional and for optimization and
-we decided to that optimization comes after functionality.
-After we started our implementation we met a few hurdles with the recursive implementation of insert and delete: This was one of the main reasons for the above mentioned function refactorization since we needed
-to adapt the imperative pseudo-code in the paper to the functional paradigm.
-After experimenting with the structure of the delete recursive function we finally found an effective way of traversing and rebuilding the tree after deletion. We did this
-by having one function for the root nodes which are a special case in the algorithm.
-We then implemented another function for the subtrees which returned information about the changes in the current subtree to the function caller, which is always the parent
-of the subtree. When we saw that this approach worked well we adapted and used it for the insert method. The search method was the easiest to implement, since traversing data structures without changing 
+We also left out a couple of functions that were suggested by the paper for the Predicates class (compress and decompress), because these functions are optional (for optimization purposes) and
+we decided that optimization comes after functionality.
+
+
+After we started our implementation we met a few hurdles with the recursive implementation of insert and delete. This was one of the main reasons for the above mentioned function refactorization since we needed
+to adapt the imperative pseudo-code in the paper \cite{Hellerstein95generalizedsearch} to the functional paradigm.
+After experimenting with the structure of the delete recursive function, we finally found an effective way of traversing and rebuilding the tree after deletion. We did this
+by having one function for the root nodes, which are a special case in the algorithm.
+We then implemented another function for the subtrees, which returned information about the changes in the current subtree to the function caller, which is always the parent
+of the subtree. When we saw that this approach worked well, we adapted and used it for the insert function. The search function was the easiest to implement, since traversing data structures without changing 
 them is simple to implement in haskell. With this the implementation of the GiST structure was done and we were now able to program the predicates that would influence the data structures behaviour.
 
 \subsection{The predicate functions}
-The predicate functions are a key part of the GiST and the part that really affects the user, because he/she can implement different predicates that then dictate the data types the GiST can work with 
-and the way the data is handled. We decided to implement two basic predicates to serve as a template for later user implementations. These predicates are the B+ tree predicate and the R-tree predicate.
+The predicate functions are a key part of the GiST and the part that is relevant to the user, because he/she can implement different predicates that then dictate the data types the GiST can work with 
+and the way this data is handled. We decided to implement two basic predicates to serve as a template for later user implementations. These predicates are the B+ tree predicate and the R-tree predicate.
 Predicates need to be an instance of the Predicates class defined in the Types.hs file, which means they have to implement four functions: consistent, union, penalty and pickSplit. Consistent determines
-if the two predicates overlap in some way (have the same truth value for a set of other Predicates). Union takes a list of Predicates and generates a Predicate that the union of all predicates in the list
-(returns true for any value that is true for at least one of the predicates in the list). Calculates a numerical penalty for inserting the entry containing the first predicate into a subtree rooted at an 
-entry containing the second predicate(calculates a numeric difference between two predicates, but is not commutative). The lastmod function pickSplit is used to split an overpopulated node in two nodes satisfying
-the GiST size constraints, so it takes a list of predicates, and splits it in two disjunct lists of predicates. The B+ tree predicate was trivial and easy to implement and most of the R-tree predicate functions were
-also simple to implement, except for the pickSplit function for the R-tree, which is an NP-hard problem. Because our decision was to place functionality over optimality, we used one of the simplest implementations
-for the pickSplit algorithm, which is the linear implementation. In this implementation the two most disparate predicates are chosen used as first elements for the two lists. Each next predicate is examined and compared
-to the predicates in the two lists, to determine in which list it would fit better. Although this implementation is not optimal it is good enough for small sets of data and can always be further optimized.
+if two predicates overlap in some way (have the same truth value for a non-empty set of other predicates). Union takes a list of predicates and generates a predicate that the union of all predicates in the list
+(returns true for any value that is true for at least one of the predicates in the list). The function penalty calculates a numerical cost for inserting one entry into a subtree rooted at another 
+entry (calculates a numeric difference between the two predicates contained in the entries, but is not commutative). The last function pickSplit is used to split an overpopulated node in two nodes satisfying
+the GiST size constraints (It takes a list of predicates, and splits it in two disjunct lists of predicates). The B+ tree predicate was trivial and easy to implement and most of the R-tree predicate functions were
+also simple to implement, except for the pickSplit function for the R-tree, which is an NP-complete problem. Because our decision was to place functionality before optimization, we used one of the simplest implementations
+for the pickSplit algorithm, which is the linear implementation. In this implementation, the two most disparate predicates are chosen and used as first elements for each of the two lists. Each next predicate is examined and compared
+to the predicates in the two lists, to determine in which list it would fit better. Although this implementation is not optimal, it is good enough for small sets of data and can always be further optimized.
 
 \subsection{Testing}
-The tests that we used for the GiST are relatively simple, consisting of 4 small programs supplied in out test folder in the GiST package on hackage. The Interactive.hs is a program which takes command line arguments
+The tests that we used for the GiST are relatively simple, consisting of four small programs supplied in the test folder of the GiST package on hackage. The Interactive.hs is a program which takes command line arguments
 given by the user and adds, removes (these changes are saved persistently) or searches data in the GiST according to the arguments. It can also be used to create an initial empty tree and write it on file for further use.
-The Tests.hs file contains a series of small tests which test the functionality of the GiST with small data sets. We also supplied two test programs that can be used to measure the performance of the GiST RandomFast.hs 
+The Tests.hs file contains a series of small tests, which test the functionality of the GiST with small data sets. We also supplied two test programs that can be used to measure the performance of the GiST: RandomFast.hs 
 and Random.hs. These two programs take command line arguments that determine how many elements should be inserted in the GiST and in what range should these elements be. The tree resulting from these inserts is then
-saved in a file. The difference between the two programs is that Random.hs writes the tree to file after each insert and then reads it again and RandomFast.hs writes the tree only once after all the inserts are finished.
-This mean Random.hs simulates the behaviour when the GiST is constantly written back to the hard drive and RandomFast.hs simulates what usually happens with data structures for databases, which means it simulates the situation
-when the GiST stays in main memory between operations.
+saved in a file. The difference between the two programs is that Random.hs writes the tree to a file (BTreeRandom.txt or RTreeRandom.txt depending on the test) after each insert and then reads it again. RandomFast.hs 
+writes the tree only once after all the inserts are finished. This means that Random.hs simulates the behaviour when the GiST is constantly written back to the hard drive and RandomFast.hs simulates what usually happens 
+with data structures for databases, which means it simulates the situation when the GiST stays in main memory between operations.
 
 \section{Conclusion}
 
-Initially we thought it would be very easy to implement the GiST structures but as mentioned before we already had some problems early on. But by surpassing 
+Initially we thought it would be very easy to implement the GiST structures, but as mentioned before we already had some problems early on. By surpassing 
 these hurdles we learned a lot about manipulating recursive data structures and the final program worked better than we expected. Because we also uploaded
-this package to hackage we learned to factorize our code to packages and how to use the haddock documentation. When writing the test programs we also used the IO Monad,
-which we hadn't used before and by this we also learned how to create safe side effects in haskell. 
+this package to hackage, we learned how to factorize our code to packages and how to use the haddock documentation. When writing the test programs we also used the IO Monad,
+which we hadn't used before. This helped us learn how to create safe side-effects in haskell. 
 
 \bibliography{bibtex} 
 \bibliographystyle{alpha}
