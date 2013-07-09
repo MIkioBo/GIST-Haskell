@@ -38,7 +38,7 @@
  We also implemented the class definitions for the predicate and the gist tree itself, with functions similar to the ones specified in the paper. 
  We later understood, that we don't need the GiST class since the user doesn't need to build any instances of this class (The GiST tree is only implemented once and should work
  for every function (predicate)). This why we no longer have a GiST class in our program and we export only the functions the user needs to manipulate the GiST structure.
-\subsection{The Tree Functions}
+\subsection{The tree Functions}
 The functions exported to the user are: insert, search, delete (suggested by the paper) and a few functions that we considered are necessary to make the GiST persistent (as proposed by Professor Andreas Frank).
 These additional functions are: save (writes a GiST persistently in a file), load(reads and parses a GiST saved in file) and empty (simply returns empty GiST with no entries).
 The paper \cite{Hellerstein95generalizedsearch} listed a couple of other functions like chooseSubtree, split, adjustKeys and condenseTree, but these functions are only helper functions for insert and delete.
